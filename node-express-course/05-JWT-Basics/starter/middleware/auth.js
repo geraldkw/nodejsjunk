@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken')
-const CustomAPIError = require('../errors/custom-error.js')
+const {UnauthenticatedError} = require('../errors')
 
 const authentication = async (req,res,next) => {
 	const authHeader = req.headers.authorization;
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		throw new CustomAPIError('No Token Provided', 401);
+		throw new UnauthenticatedError('No Token Provided');
 	}
 	
 	const token = authHeader.split(' ')[1];
@@ -14,7 +14,7 @@ const authentication = async (req,res,next) => {
 		req.user = {id, username}
 		next()
 	} catch (error) {
-		throw new CustomAPIError('Not Authorized to view route', 401)
+		throw new UnauthenticatedError('Not Authorized to view route')
 	}
 	next()
 }
