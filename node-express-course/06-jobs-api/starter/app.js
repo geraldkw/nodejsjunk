@@ -1,5 +1,11 @@
 require('dotenv').config();
 require('express-async-errors');
+
+const rateLimiter = require('express-rate-limit');
+const helmet = require('helmet')
+const cors = require('cors')
+const xss = require('xss-clean')
+
 const express = require('express');
 const app = express();
 
@@ -17,7 +23,14 @@ const errorHandlerMiddleware = require('./middleware/error-handler');
 authenticateUser = require('./middleware/authentication')
 app.use(express.json());
 // extra packages
-
+app.set('trust proxy', 1); //needed for Heroku
+app.use(rateLimiter({
+	windowsMS: 15*60*1000, //15minutes
+	max: 100, //100 hits per windowsMS
+}))
+app.use(helmet())
+app.use(cors())
+app.use(xss())
 // routes
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/jobs', authenticateUser, jobsRouter)
